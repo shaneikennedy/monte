@@ -1,0 +1,5 @@
+matplotlib
+scipy
+pandas_datareader
+plotly
+
