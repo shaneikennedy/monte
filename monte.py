@@ -9,43 +9,42 @@ from fetchHist import fetchHist
 
 def monte(symbol):
     data = fetchHist(symbol) #get last 60 days
-    data = data[0:60]
-    data = list(reversed(data))
-    numSims = 0
-    MC = {'price': -1}
-    expect = []
+    data = list(reversed(data[0:60]))
+    num_sims = 0
+    mc = {'price': -1}
+    expected = []
     # one hundred simulations
-    while numSims < 100:
-        numSims = numSims + 1
-        MC[str(numSims)] = monte_carlo(data, 60)
+    while num_sims < 100:
+        num_sims += 1
+        mc[num_sims] = monte_carlo(data, 60)
         del(data[-60:])
     for i in range(0,60):
         today = []
-        for key in MC:
+        for key in mc:
             if key != 'price':
-                today.append(MC[key][i])
-        expect.append(np.mean(today))
-    plt.plot(np.arange(0,60,1), expect)
+                today.append(mc[key][i])
+        expected.append(np.mean(today))
+    plt.plot(np.arange(0,60,1), expected)
     plt.title(symbol.upper())
     plt.xlabel('Days')
     plt.ylabel('Price ($)')
-    plt.axis([0, 60, min(expect), max(expect)])
+    plt.axis([0, 60, min(expected), max(expected)])
     plt.show()
 
 def monte_carlo(orig, days):
     count = 0
     mc = []
-    while count<days:
+    while count < days:
         pdr = []
         count = count + 1
         for i in range(1,len(orig)-1):
                 pdr.append(math.log(orig[i]/orig[i-1])) #periodic daily return
         adr = np.mean(pdr) #average daily return
-        standDev = np.std(pdr)
+        stand_dev = np.std(pdr)
         x = random.random()
         drift = 0 #small look ahead period
-        Rval = norm.ppf(x, loc=adr, scale=standDev)
-        price = orig[len(orig)-1]*np.exp(Rval+drift)
+        r_val = norm.ppf(x, loc=adr, scale=stand_dev)
+        price = orig[len(orig)-1]*np.exp(r_val+drift)
         orig.append(price)
         mc.append(orig[len(orig)-1])
     return mc
